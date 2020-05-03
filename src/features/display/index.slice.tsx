@@ -70,6 +70,15 @@ export const {
 
 export default display.reducer
 
+export const clearAll = (): AppThunk => async dispatch => {
+  batch(() => {
+    dispatch(clearHistory())
+    dispatch(clearOperator())
+    dispatch(clearCurrentValue())
+    dispatch(clearResult())
+  })
+}
+
 export const updateCurrentValueWithNumber = (value: string): AppThunk => async (
   dispatch,
   getState

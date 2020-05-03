@@ -6,6 +6,7 @@ import Number from '../../features/number'
 import Symbol from '../../features/symbol'
 import Dot from '../../features/dot'
 import Equality from '../../features/equality'
+import Clear from '../../features/clear'
 
 const Layout = () => {
   return (
@@ -15,7 +16,7 @@ const Layout = () => {
       <Row>
         <Symbol value='%' />
         <Button value='+/-' />
-        <Button value='C' />
+        <Clear value='C' />
         <Symbol value='/' />
       </Row>
       <Row>
