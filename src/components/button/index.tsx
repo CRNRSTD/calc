@@ -12,10 +12,11 @@ const Button: FunctionComponent<ButtonProps> = ({
 }) => {
   return (
     <styled.Button onClick={onClick}>
-      {value}
+      <styled.ButtonInner>
+        {value}
+      </styled.ButtonInner>
     </styled.Button>
   )
 }
 
 export default Button
-export { default as Inverse } from './inverse'

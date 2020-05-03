@@ -5,14 +5,14 @@ import { AppThunk } from '../../global/store'
 import { calcResult } from '../../api/math'
 
 interface State {
-  history: string
+  history: string[]
   operator: string
   currentValue: string
   result: string
 }
 
 const initialState: State = {
-  history: '',
+  history: [],
   operator: '',
   currentValue: '',
   result: '',
@@ -22,20 +22,20 @@ const display = createSlice({
   name: 'display',
   initialState,
   reducers: {
-    setHistory(state, { payload }: PayloadAction<string>) {
+    setHistory(state, { payload }: PayloadAction<string[]>) {
       state.history = payload
     },
-    pushHistory(state, { payload }: PayloadAction<string>) {
-      state.history = state.history + payload
+    pushHistory(state, { payload }: PayloadAction<string[]>) {
+      state.history = [...state.history, ...payload]
     },
     clearHistory(state) {
-      state.history = ''
+      state.history = initialState.history
     },
     setOperator(state, { payload }: PayloadAction<string>) {
       state.operator = payload
     },
     clearOperator(state) {
-      state.operator = ''
+      state.operator = initialState.operator
     },
     setCurrentValue(state, { payload }: PayloadAction<string>) {
       state.currentValue = payload
@@ -44,13 +44,13 @@ const display = createSlice({
       state.currentValue = state.currentValue + payload
     },
     clearCurrentValue(state) {
-      state.currentValue = ''
+      state.currentValue = initialState.currentValue
     },
     setResult(state, { payload }: PayloadAction<string>) {
       state.result = payload
     },
     clearResult(state) {
-      state.result = ''
+      state.result = initialState.result
     },
   },
 })
@@ -97,10 +97,32 @@ export const updateCurrentValueWithNumber = (value: string): AppThunk => async (
   if (value === '0' && currentValue === '0') return
 
   batch(() => {
-    dispatch(pushHistory(operator))
+    !!operator && dispatch(pushHistory(operator))
     dispatch(clearOperator())
     dispatch(currentValue === '0' ? setCurrentValue(value) : pushCurrentValue(value))
   })
+}
+
+const invertible: {
+  [key: string]: string
+} = {
+  '+': '-',
+  '-': '+'
+}
+
+export const updateExpressionWithInversedSymbol = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  const { history, currentValue } = getDisplayData(getState())
+  const [last, ...rest] = [...history].reverse()
+  const newOperator = invertible[last] || last + '-'
+
+  if (!!!history.length && !!!currentValue) return
+
+  !!!last && dispatch(setHistory(['-']))
+
+  !!last && !!currentValue && dispatch(setHistory([...rest.reverse(), newOperator]))
 }
 
 export const updateExpressionWithSymbol = (value: string): AppThunk => async (
@@ -110,7 +132,8 @@ export const updateExpressionWithSymbol = (value: string): AppThunk => async (
   const { currentValue, history, result } = getDisplayData(getState())
 
   // Do not start with symbol
-  if (!!!currentValue && !!history && !!result) return
+  if (!!!currentValue && !!!history.length && !!!result) return
+  if (!!!currentValue && (!!history.length && !!result)) return
 
   if (!!result) {
     batch(() => {
@@ -120,7 +143,7 @@ export const updateExpressionWithSymbol = (value: string): AppThunk => async (
   }
 
   batch(() => {
-    dispatch(pushHistory(currentValue))
+    !!currentValue && dispatch(pushHistory(currentValue))
     dispatch(clearCurrentValue())
     dispatch(setOperator(value))
   })
@@ -147,7 +170,7 @@ export const updateHistory = ({
   currentValue: string
 }): AppThunk => async (dispatch) => {
   batch(() => {
-    dispatch(setHistory(history + operator + currentValue))
+    dispatch(setHistory([...history, operator, currentValue].filter(Boolean)))
     dispatch(clearCurrentValue())
     dispatch(clearOperator())
   })

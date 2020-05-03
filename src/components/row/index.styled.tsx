@@ -71,7 +71,11 @@ export const Row = styled.div`
       }
       :nth-child(3) {
         background-color: ${({ theme: { pink } }) => pink};
-        flex-grow: 2;
+        width: 50%;
+
+        ::after {
+          padding-bottom: 50%;
+        }
       }
     }
   }

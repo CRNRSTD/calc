@@ -15,7 +15,7 @@ const Equality: FunctionComponent = () => {
       operator,
       currentValue
     }))
-    dispatch(fetchResult(history + operator + currentValue))
+    dispatch(fetchResult(history.join('') + operator + currentValue))
   }
 
   return (
